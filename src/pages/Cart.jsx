@@ -1,62 +1,87 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import CartRow from "../components/CartRow";
-import Receipt from "../components/Receipt";
+import CartItem from "../components/cart/CartItem";
+import CartSummary from "../components/cart/CartSummary";
+import EmptyState from "../components/ui/EmptyState";
 import { useToast } from "../context/ToastContext";
-import { cartCleared, selectCartItems } from "../features/cart/cartSlice";
+import { cartCleared, selectCartCount, selectCartItems } from "../features/cart/cartSlice";
+import { selectIsLoggedIn } from "../features/auth/authSlice";
 
 export default function Cart() {
   const items = useSelector(selectCartItems);
+  const count = useSelector(selectCartCount);
+  const isLoggedIn = useSelector(selectIsLoggedIn);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { notify } = useToast();
 
   if (items.length === 0) {
     return (
-      <div className="mx-auto max-w-6xl px-4 py-24 text-center sm:px-6">
-        <h1 className="font-display text-3xl font-bold tracking-tight">Nothing in the cart</h1>
-        <p className="mt-2 text-sm text-muted">Pick something from the shop and it'll show up here.</p>
-        <Link
-          to="/"
-          className="gradient-bg mt-6 inline-block rounded-lg px-5 py-2.5 text-sm font-semibold text-white"
-        >
-          Browse the shop
-        </Link>
-      </div>
+      <EmptyState
+        eyebrow="Cart"
+        title="Your cart is waiting."
+        description="Nothing in it yet. The catalogue is short — it won't take long to find something."
+        actionLabel="Continue shopping"
+        actionTo="/products"
+      />
     );
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
-      <div className="flex items-end justify-between gap-4">
-        <h1 className="font-display text-3xl font-bold tracking-tight">Your cart</h1>
+    <div className="shell py-12 sm:py-16">
+      <div className="flex items-end justify-between gap-4 border-b border-line pb-6">
+        <div>
+          <p className="eyebrow">Cart</p>
+          <h1 className="t-section mt-3 text-ink">
+            {count} {count === 1 ? "item" : "items"}
+          </h1>
+        </div>
+
         <button
+          type="button"
           onClick={() => {
             dispatch(cartCleared());
             notify("Cart emptied.");
           }}
-          className="text-sm text-muted transition-colors hover:text-ink"
+          className="pb-1 text-sm text-muted underline decoration-line-strong underline-offset-4 transition-colors hover:text-ink"
         >
           Empty cart
         </button>
       </div>
 
-      <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_20rem]">
-        <ul className="panel rounded-2xl px-5">
+      <div className="mt-10 grid gap-10 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-16">
+        {/* min-w-0 stops long product titles setting the grid column's
+            intrinsic width and overflowing the page on narrow screens. */}
+        <ul className="min-w-0">
           {items.map((item) => (
-            <CartRow key={item.id} item={item} />
+            <CartItem key={item.id} item={item} />
           ))}
         </ul>
 
-        <div className="lg:sticky lg:top-24 lg:self-start">
-          <Receipt>
+        <div className="min-w-0 lg:sticky lg:top-28 lg:self-start">
+          <CartSummary>
             <button
+              type="button"
               onClick={() => navigate("/checkout")}
-              className="gradient-bg mt-6 w-full rounded-lg py-2.5 text-sm font-semibold text-white"
+              className="btn btn-primary mt-7 w-full"
             >
-              Checkout
+              Proceed to checkout
             </button>
-          </Receipt>
+
+            {/* Said here rather than discovered at the redirect. */}
+            {!isLoggedIn && (
+              <p className="mt-3.5 text-center text-xs text-muted">
+                You'll be asked to sign in first.
+              </p>
+            )}
+          </CartSummary>
+
+          <Link
+            to="/products"
+            className="mt-6 block text-center text-sm text-muted transition-colors hover:text-ink"
+          >
+            Continue shopping
+          </Link>
         </div>
       </div>
     </div>

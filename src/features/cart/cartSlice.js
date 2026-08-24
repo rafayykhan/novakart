@@ -11,18 +11,23 @@ const cartSlice = createSlice({
   reducers: {
     itemAdded(state, action) {
       const product = action.payload;
+
+      // Cards dispatch the bare product and mean "one". The product page has
+      // a quantity stepper, so it passes { ...product, qty } - reading the
+      // amount off the payload keeps both call sites on the same action.
+      const amount = Math.max(1, Math.trunc(Number(product.qty) || 1));
       const existing = state.items.find((i) => i.id === product.id);
 
       // Immer lets me push/mutate here - it's still immutable underneath.
       if (existing) {
-        existing.qty += 1;
+        existing.qty += amount;
       } else {
         state.items.push({
           id: product.id,
           title: product.title,
           price: product.price,
           image: product.image,
-          qty: 1,
+          qty: amount,
         });
       }
     },

@@ -2,7 +2,7 @@
 // Products are real (Fake Store API), login is faked with a timeout because
 // I didn't want to run a backend just for this.
 
-const PRODUCTS_URL = "https://fakestoreapi.com/products?limit=12";
+const PRODUCTS_URL = "https://fakestoreapi.com/products";
 
 export async function getProducts() {
   const res = await fetch(PRODUCTS_URL);
@@ -14,14 +14,18 @@ export async function getProducts() {
 
   const data = await res.json();
 
-  // trimming the payload down to what the UI actually renders
+  // Trimming the payload down to what the UI renders. `description` and the
+  // rating pair are kept now that there's a product page to show them on —
+  // everything here comes straight from the API, nothing is synthesised.
   return data.map((p) => ({
     id: p.id,
     title: p.title,
     price: p.price,
     image: p.image,
     category: p.category,
-    rating: p.rating?.rate ?? 0,
+    description: p.description ?? "",
+    rating: p.rating?.rate ?? null,
+    ratingCount: p.rating?.count ?? null,
   }));
 }
 

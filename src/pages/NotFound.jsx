@@ -2,16 +2,33 @@ import { Link } from "react-router-dom";
 
 export default function NotFound() {
   return (
-    <div className="mx-auto max-w-md px-4 py-24 text-center">
-      <p className="gradient-text font-display text-6xl font-bold">404</p>
-      <h1 className="mt-4 font-display text-2xl font-bold">That page isn't here</h1>
-      <p className="mt-2 text-sm text-muted">Check the address, or start again from the shop.</p>
-      <Link
-        to="/"
-        className="mt-8 inline-block rounded-lg border border-line px-5 py-2.5 text-sm transition-colors hover:text-ink"
-      >
-        Back to the shop
-      </Link>
+    <div className="shell flex min-h-[60vh] items-center py-20">
+      <div className="max-w-lg">
+        {/* Big, quiet, and set in the display face rather than dressed up in
+            a gradient — the page is an apology, not a feature. */}
+        <p
+          className="font-display text-[clamp(4rem,14vw,9rem)] font-bold leading-none tracking-tighter text-line-strong"
+          aria-hidden="true"
+        >
+          404
+        </p>
+
+        <h1 className="t-sub mt-6 text-ink">That page isn't here.</h1>
+
+        <p className="t-lead measure mt-4">
+          The address may be wrong, or whatever was here has moved. The
+          catalogue is short — it's easy enough to find your way back.
+        </p>
+
+        <div className="mt-9 flex flex-wrap gap-3">
+          <Link to="/products" className="btn btn-primary">
+            Browse the shop
+          </Link>
+          <Link to="/" className="btn btn-secondary">
+            Back home
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }

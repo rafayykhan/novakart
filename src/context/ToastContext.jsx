@@ -22,11 +22,20 @@ export function ToastProvider({ children }) {
     }
   }, []);
 
+  /**
+   * notify("Cart emptied.")
+   * notify("Login failed.", "error")
+   * notify("Added to cart", "success", { label: "View cart", to: "/cart" })
+   *
+   * `action` is the single follow-up a toast may carry. Anything needing more
+   * than one link wants a page, not a toast.
+   */
   const notify = useCallback(
-    (message, tone = "info") => {
+    (message, tone = "info", action = null) => {
       const id = crypto.randomUUID();
-      setToasts((list) => [...list, { id, message, tone }]);
-      timers.current.set(id, setTimeout(() => dismiss(id), 2600));
+      setToasts((list) => [...list, { id, message, tone, action }]);
+      // One with something to click gets a little longer to be clicked.
+      timers.current.set(id, setTimeout(() => dismiss(id), action ? 4200 : 2600));
     },
     [dismiss]
   );

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useToast } from "../context/ToastContext";
 import {
@@ -9,8 +9,18 @@ import {
   selectAuthStatus,
   selectIsLoggedIn,
 } from "../features/auth/authSlice";
+import { selectAllProducts } from "../features/products/productsSlice";
 import { DEMO_CREDENTIALS } from "../api/shopApi";
+import { AlertIcon } from "../components/Icons";
 
+/**
+ * Split layout: a brand panel on the left, the form on the right.
+ *
+ * There are no social sign-in buttons. This app authenticates against one
+ * hardcoded demo account — a row of Google/Apple/GitHub buttons that all did
+ * nothing would look complete and be a lie, so the panel says plainly what
+ * the one working account is.
+ */
 export default function Login() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -20,6 +30,7 @@ export default function Login() {
   const status = useSelector(selectAuthStatus);
   const error = useSelector(selectAuthError);
   const isLoggedIn = useSelector(selectIsLoggedIn);
+  const products = useSelector(selectAllProducts);
 
   const [form, setForm] = useState({ email: "", password: "" });
 
@@ -49,74 +60,136 @@ export default function Login() {
   }
 
   const busy = status === "loading";
+  const art = products[7] ?? products[0];
 
   return (
-    <div className="mx-auto flex max-w-md flex-col justify-center px-4 py-16">
-      <p className="text-[11px] uppercase tracking-[0.18em] text-muted">Account</p>
-      <h1 className="mt-2 font-display text-3xl font-bold tracking-tight">
-        Sign in to <span className="gradient-text">NovaKart</span>
-      </h1>
-      <p className="mt-2 text-sm text-muted">
-        The cart is public. Checkout needs an account.
-      </p>
+    <div className="grid min-h-[calc(100dvh-8rem)] lg:grid-cols-2">
+      {/* --- brand panel --- */}
+      <aside className="relative hidden flex-col justify-between border-r border-line bg-surface p-12 lg:flex xl:p-16">
+        <p className="eyebrow">NovaKart · Account</p>
 
-      <form onSubmit={handleSubmit} className="panel mt-8 rounded-2xl p-6">
-        <label className="block text-sm font-medium" htmlFor="email">
-          Email
-        </label>
-        <input
-          id="email"
-          name="email"
-          type="email"
-          required
-          autoComplete="email"
-          value={form.email}
-          onChange={handleChange}
-          placeholder="you@example.com"
-          className="mt-2 w-full rounded-lg border border-line bg-transparent px-3 py-2.5 text-sm outline-none placeholder:text-muted/60"
-        />
-
-        <label className="mt-5 block text-sm font-medium" htmlFor="password">
-          Password
-        </label>
-        <input
-          id="password"
-          name="password"
-          type="password"
-          required
-          autoComplete="current-password"
-          value={form.password}
-          onChange={handleChange}
-          placeholder="••••••••"
-          className="mt-2 w-full rounded-lg border border-line bg-transparent px-3 py-2.5 text-sm outline-none placeholder:text-muted/60"
-        />
-
-        {error && (
-          <p className="mt-4 rounded-lg border border-rose-400/30 bg-rose-400/10 px-3 py-2 text-sm text-rose-500">
-            {error}
+        <div className="max-w-md">
+          <p className="t-quote text-ink text-balance">
+            Less noise. Better products.
           </p>
+          <p className="t-lead mt-6">
+            Your cart works signed out. An account is only needed at the point
+            of placing an order.
+          </p>
+        </div>
+
+        {art ? (
+          <div className="media-plate flex h-56 w-56 items-center justify-center rounded-lg p-10 xl:h-64 xl:w-64">
+            <img
+              src={art.image}
+              alt=""
+              loading="lazy"
+              className="h-full w-full object-contain"
+            />
+          </div>
+        ) : (
+          <div className="h-56 w-56 rounded-lg bg-surface-2" aria-hidden="true" />
         )}
+      </aside>
 
-        <button
-          type="submit"
-          disabled={busy}
-          className="gradient-bg mt-6 w-full rounded-lg py-2.5 text-sm font-semibold text-white transition-opacity disabled:opacity-60"
-        >
-          {busy ? "Signing in…" : "Sign in"}
-        </button>
+      {/* --- form --- */}
+      <div className="flex items-center justify-center px-5 py-16 sm:px-8 lg:px-12">
+        <div className="w-full max-w-sm">
+          <p className="eyebrow lg:hidden">Account</p>
 
-        <button
-          type="button"
-          onClick={() => setForm(DEMO_CREDENTIALS)}
-          className="mt-3 w-full rounded-lg border border-line py-2.5 text-sm text-muted transition-colors hover:text-ink"
-        >
-          Fill the demo account
-        </button>
-      </form>
+          <h1 className="t-sub mt-3 text-ink lg:mt-0">Sign in</h1>
+          <p className="mt-3 text-sm text-muted">
+            New here?{" "}
+            <Link
+              to="/products"
+              className="text-ink underline decoration-line-strong underline-offset-4 hover:decoration-ink"
+            >
+              Have a look around first
+            </Link>
+            .
+          </p>
 
-      <p className="nums mt-4 text-center text-xs text-muted">
-        {DEMO_CREDENTIALS.email} / {DEMO_CREDENTIALS.password}
-      </p>
+          <form onSubmit={handleSubmit} className="mt-10" noValidate>
+            <div>
+              <label className="label" htmlFor="email">
+                Email
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                required
+                autoComplete="email"
+                value={form.email}
+                onChange={handleChange}
+                placeholder="you@example.com"
+                aria-invalid={Boolean(error)}
+                className="field"
+              />
+            </div>
+
+            <div className="mt-6">
+              <div className="flex items-baseline justify-between">
+                <label className="label" htmlFor="password">
+                  Password
+                </label>
+              </div>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                required
+                autoComplete="current-password"
+                value={form.password}
+                onChange={handleChange}
+                placeholder="••••••••"
+                aria-invalid={Boolean(error)}
+                aria-describedby={error ? "login-error" : undefined}
+                className="field"
+              />
+            </div>
+
+            {error && (
+              <p
+                id="login-error"
+                role="alert"
+                className="mt-5 flex items-start gap-2.5 rounded-md border border-danger/30 bg-danger/10 px-3.5 py-3 text-sm text-danger"
+              >
+                <AlertIcon width={16} height={16} className="mt-0.5 shrink-0" />
+                {error}
+              </p>
+            )}
+
+            <button
+              type="submit"
+              disabled={busy}
+              className="btn btn-primary btn-lg mt-8 w-full"
+            >
+              {busy ? "Signing in…" : "Sign in"}
+            </button>
+          </form>
+
+          {/* The one working account, stated rather than hidden. */}
+          <div className="mt-8 rounded-md border border-line bg-surface-2 p-4">
+            <p className="text-xs leading-relaxed text-muted">
+              <span className="text-ink">Demo account.</span> There's no user
+              database behind this — one set of credentials works:
+            </p>
+            <p className="nums mt-2 font-mono text-xs text-ink">
+              {DEMO_CREDENTIALS.email}
+              <br />
+              {DEMO_CREDENTIALS.password}
+            </p>
+            <button
+              type="button"
+              onClick={() => setForm(DEMO_CREDENTIALS)}
+              className="btn btn-secondary btn-sm mt-4 w-full"
+            >
+              Fill it in
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
