@@ -10,7 +10,7 @@
  * "estimated tax — $0.00" row would be a number we made up.
  */
 export const SHIPPING_FLAT = 4.99;
-export const FREE_SHIPPING_OVER = 120;
+export const FREE_SHIPPING_OVER = 75;
 
 export function shippingFor(subtotal) {
   if (subtotal === 0) return 0;
