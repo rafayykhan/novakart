@@ -5,7 +5,10 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  // .claude/worktrees holds throwaway git worktrees the tooling creates. Each
+  // is a full copy of the repo, so without this every file gets linted twice
+  // and the duplicates read as real errors.
+  globalIgnores(['dist', '.claude/worktrees']),
   {
     files: ['**/*.{js,jsx}'],
     extends: [
