@@ -27,35 +27,40 @@ export default function Newsletter() {
   }
 
   return (
-    <section className="band border-t border-line">
-      <div className="shell">
-        <div className="grid gap-10 lg:grid-cols-2 lg:gap-20">
+    <section className="on-ink" aria-labelledby="newsletter-heading">
+      <div className="shell band">
+        <div className="grid gap-12 lg:grid-cols-2 lg:gap-24">
           <div>
-            <p className="eyebrow">Stay in the loop</p>
-            <h2 className="t-section mt-4 text-ink text-balance">
-              New things worth seeing.
+            <p className="eyebrow flex items-center gap-3">
+              <span className="h-px w-8 bg-[#ec3013]" aria-hidden="true" />
+              Stay in the loop
+            </p>
+            <h2 id="newsletter-heading" className="t-display mt-6 text-[#f4efe6] text-balance">
+              New things
+              <br />
+              worth seeing.
             </h2>
           </div>
 
-          <div className="lg:pt-2">
-            <p className="t-lead max-w-md">
+          <div className="lg:pt-4">
+            <p className="max-w-md text-[15px] leading-relaxed text-[#f4efe6]/70">
               An occasional note when something lands. No daily mail, no
-              countdowns.
+              countdowns, no "last chance".
             </p>
 
             {state === "done" ? (
-              <div className="mt-7 flex items-start gap-3 rounded-md border border-line bg-surface-2 p-4">
-                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-ink text-bg">
+              <div className="mt-8 flex max-w-md items-start gap-3.5 border border-[#f4efe6]/20 p-5">
+                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#ec3013] text-white">
                   <CheckIcon width={12} height={12} />
                 </span>
-                <p className="text-sm leading-relaxed text-muted">
-                  <span className="text-ink">That address looks right.</span> To
-                  be straight with you though — this build has no mailing
+                <p className="text-sm leading-relaxed text-[#f4efe6]/70">
+                  <span className="text-[#f4efe6]">That address looks right.</span>{" "}
+                  To be straight with you though — this build has no mailing
                   service connected, so nothing was stored or sent.
                 </p>
               </div>
             ) : (
-              <form onSubmit={submit} className="mt-7 max-w-md" noValidate>
+              <form onSubmit={submit} className="mt-8 max-w-md" noValidate>
                 <label htmlFor={inputId} className="sr-only">
                   Email address
                 </label>
@@ -72,17 +77,19 @@ export default function Newsletter() {
                     placeholder="you@example.com"
                     aria-invalid={state === "invalid"}
                     aria-describedby={state === "invalid" ? `${inputId}-error` : undefined}
-                    className="field flex-1"
+                    /* The ink field needs its own input treatment — .field is
+                       built for the cream page and would vanish here. */
+                    className="flex-1 rounded-sm border border-[#f4efe6]/25 bg-transparent px-4 py-3.5 text-[15px] text-[#f4efe6] outline-none transition-colors placeholder:text-[#f4efe6]/40 hover:border-[#f4efe6]/50 focus:border-[#ec3013] focus:ring-2 focus:ring-[#ec3013]/40 aria-[invalid=true]:border-[#ff6a4d]"
                   />
 
-                  <button type="submit" className="btn btn-primary shrink-0">
+                  <button type="submit" className="btn btn-red shrink-0">
                     Sign up
-                    <ArrowRightIcon width={15} height={15} />
+                    <ArrowRightIcon width={14} height={14} className="arrow" />
                   </button>
                 </div>
 
                 {state === "invalid" && (
-                  <p id={`${inputId}-error`} className="mt-2.5 text-sm text-danger">
+                  <p id={`${inputId}-error`} className="mt-3 text-sm text-[#ff8a72]">
                     Enter a valid email address.
                   </p>
                 )}
