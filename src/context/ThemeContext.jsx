@@ -10,7 +10,8 @@ import { load, save } from "../app/storage";
 const ThemeContext = createContext(null);
 
 export function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState(() => load("novakart_theme", "dark"));
+  // Cream is the brand. Dark is a designed alternative, not the default.
+  const [theme, setTheme] = useState(() => load("novakart_theme", "light"));
 
   // index.css keys every colour off this attribute
   useEffect(() => {
