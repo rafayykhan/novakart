@@ -22,7 +22,7 @@ export default function Toaster({ toasts, onDismiss }) {
         return (
           <div
             key={toast.id}
-            className="rise pointer-events-auto flex w-full max-w-sm items-center gap-3 rounded-md border border-line bg-surface px-4 py-3 shadow-[var(--shadow-md)] sm:w-auto sm:min-w-[20rem]"
+            className="rise pointer-events-auto flex w-full max-w-sm items-center gap-3 rounded-sm border border-line bg-surface px-4 py-3 shadow-[var(--shadow-md)] sm:w-auto sm:min-w-[20rem]"
           >
             <span
               className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${
