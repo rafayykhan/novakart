@@ -1,13 +1,19 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useTheme } from "../../context/ThemeContext";
 import { useToast } from "../../context/ToastContext";
 import { loggedOut, selectUser } from "../../features/auth/authSlice";
 import { cartCleared, selectCartCount } from "../../features/cart/cartSlice";
 import { selectWishlistCount } from "../../features/wishlist/wishlistSlice";
-import { categoryChanged, selectCategories } from "../../features/products/productsSlice";
-import { categoryLabel } from "../../utils/format";
+import {
+  categoryChanged,
+  departmentChanged,
+  queryChanged,
+  selectAllProducts,
+  selectMenu,
+  sortChanged,
+} from "../../features/products/productsSlice";
 import {
   CartIcon,
   ChevronDownIcon,
@@ -19,65 +25,73 @@ import {
   UserIcon,
 } from "../Icons";
 import Logo from "./Logo";
+import MegaMenu from "./MegaMenu";
 import SearchOverlay from "../search/SearchOverlay";
 import MobileMenu from "./MobileMenu";
 
 /**
- * Text-first navigation with a lot of air around it. No pills, no boxes —
- * the only enclosed things up here are the count badges, because a number
- * needs a shape to sit in.
+ * Primary navigation.
  *
- * Layout is three zones: brand, links, actions. On mobile the links collapse
- * into a drawer and the actions shrink to search + cart + menu.
+ * Text-first and spacious — the only enclosed shapes up here are the count
+ * badges, because a number needs something to sit in. A hairline underneath,
+ * no shadow, no floating pill.
  */
 export default function Navbar() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const { theme, toggleTheme } = useTheme(); // context
   const { notify } = useToast(); // context
   const user = useSelector(selectUser); // redux
   const cartCount = useSelector(selectCartCount);
   const savedCount = useSelector(selectWishlistCount);
-  const categories = useSelector(selectCategories);
+  const menu = useSelector(selectMenu);
+  const products = useSelector(selectAllProducts);
 
   const [searchOpen, setSearchOpen] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [catsOpen, setCatsOpen] = useState(false);
-  const catsRef = useRef(null);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [megaOpen, setMegaOpen] = useState(false);
 
-  const realCategories = categories.filter((c) => c !== "all");
+  const megaWrapRef = useRef(null);
+  const closeTimer = useRef(null);
 
   // Stable identities: the overlays key their focus/scroll-lock effects off
   // onClose, and the navbar re-renders on every cart change. An inline arrow
-  // here would re-run those effects — and re-steal focus — each time.
+  // would re-run those effects — and re-steal focus — each time.
   const closeSearch = useCallback(() => setSearchOpen(false), []);
-  const closeMenu = useCallback(() => setMenuOpen(false), []);
+  const closeMobile = useCallback(() => setMobileOpen(false), []);
+  const closeMega = useCallback(() => setMegaOpen(false), []);
 
-  // Close the category flyout on outside click. Escape is handled on the
-  // panel itself so it doesn't need a document-level key listener.
+  // The mega-menu's feature slot: best-rated in-stock product in the catalogue.
+  const feature = products.length
+    ? [...products].sort(
+        (a, b) =>
+          (b.inStock ? 1 : 0) - (a.inStock ? 1 : 0) || (b.rating ?? 0) - (a.rating ?? 0)
+      )[0]
+    : null;
+
   useEffect(() => {
-    if (!catsOpen) return;
+    if (!megaOpen) return;
     function onPointerDown(event) {
-      if (!catsRef.current?.contains(event.target)) setCatsOpen(false);
+      if (!megaWrapRef.current?.contains(event.target)) setMegaOpen(false);
     }
     document.addEventListener("mousedown", onPointerDown);
     return () => document.removeEventListener("mousedown", onPointerDown);
-  }, [catsOpen]);
+  }, [megaOpen]);
 
-  // In-app navigation closes overlays at the call site — every link inside
-  // one already fires onClose. Browser back/forward doesn't go through any of
-  // those, so it's handled here, and popstate is a real external event rather
-  // than a render-triggered reset.
+  // Browser back/forward doesn't go through any link handler, so close here.
   useEffect(() => {
     function closeAll() {
-      setCatsOpen(false);
-      setMenuOpen(false);
+      setMegaOpen(false);
+      setMobileOpen(false);
       setSearchOpen(false);
     }
     window.addEventListener("popstate", closeAll);
     return () => window.removeEventListener("popstate", closeAll);
   }, []);
+
+  useEffect(() => () => clearTimeout(closeTimer.current), []);
 
   function handleSignOut() {
     dispatch(loggedOut());
@@ -86,79 +100,89 @@ export default function Navbar() {
     navigate("/login");
   }
 
-  function goToCategory(category) {
-    dispatch(categoryChanged(category));
-    setCatsOpen(false);
+  /** One entry point for every way the nav can send you to the catalogue. */
+  function browse({ category, department, sort, productId } = {}) {
+    setMegaOpen(false);
+    setMobileOpen(false);
+
+    if (productId) {
+      navigate(`/product/${productId}`);
+      return;
+    }
+
+    dispatch(queryChanged(""));
+    if (department) dispatch(departmentChanged(department));
+    else dispatch(categoryChanged(category ?? "all"));
+    if (sort) dispatch(sortChanged(sort));
+
     navigate("/products");
   }
 
-  const navLink = ({ isActive }) =>
-    `relative py-2 font-display text-sm font-medium transition-colors after:absolute after:inset-x-0 after:-bottom-0.5 after:h-px after:origin-left after:scale-x-0 after:bg-ink after:transition-transform after:duration-200 hover:text-ink hover:after:scale-x-100 ${
-      isActive ? "text-ink after:scale-x-100" : "text-muted"
-    }`;
+  const isShop = location.pathname.startsWith("/product");
 
   return (
     <>
-      <header className="sticky top-0 z-40 border-b border-line bg-bg/85 backdrop-blur-md">
-        <nav className="shell flex h-16 items-center gap-4 sm:h-[72px]" aria-label="Main">
-          <Logo />
+      <header className="sticky top-0 z-40 border-b border-line bg-bg/95 backdrop-blur-md">
+        <nav
+          className="shell flex h-[68px] items-center gap-4 lg:h-20"
+          aria-label="Main"
+        >
+          <Logo size="md" />
 
           {/* --- desktop links --- */}
-          <div className="ml-10 hidden items-center gap-8 lg:flex">
-            <NavLink to="/products" className={navLink} end>
+          <div className="ml-12 hidden items-center gap-9 xl:gap-11 lg:flex">
+            <button
+              type="button"
+              onClick={() => browse({ category: "all" })}
+              className="nav-link"
+              data-active={isShop || undefined}
+            >
               Shop
-            </NavLink>
+            </button>
 
-            <div className="relative" ref={catsRef}>
+            <div
+              ref={megaWrapRef}
+              onMouseEnter={() => {
+                clearTimeout(closeTimer.current);
+                if (menu.length) setMegaOpen(true);
+              }}
+              onMouseLeave={() => {
+                closeTimer.current = setTimeout(() => setMegaOpen(false), 160);
+              }}
+            >
               <button
                 type="button"
-                onClick={() => setCatsOpen((v) => !v)}
-                onKeyDown={(e) => e.key === "Escape" && setCatsOpen(false)}
-                aria-expanded={catsOpen}
+                onClick={() => menu.length && setMegaOpen((v) => !v)}
+                aria-expanded={megaOpen}
                 aria-haspopup="true"
-                disabled={realCategories.length === 0}
-                className="flex items-center gap-1.5 py-2 font-display text-sm font-medium text-muted transition-colors hover:text-ink disabled:opacity-50"
+                disabled={menu.length === 0}
+                className="nav-link flex items-center gap-1.5 disabled:opacity-40"
+                data-active={megaOpen || undefined}
               >
                 Categories
                 <ChevronDownIcon
-                  width={14}
-                  height={14}
-                  className={`transition-transform duration-200 ${catsOpen ? "rotate-180" : ""}`}
+                  width={13}
+                  height={13}
+                  className={`transition-transform duration-200 ${megaOpen ? "rotate-180" : ""}`}
                 />
               </button>
-
-              {catsOpen && realCategories.length > 0 && (
-                <div
-                  className="slide-down absolute left-0 top-full mt-3 w-60 overflow-hidden rounded-lg border border-line bg-surface p-1.5 shadow-[var(--shadow-md)]"
-                  onKeyDown={(e) => e.key === "Escape" && setCatsOpen(false)}
-                >
-                  {realCategories.map((category) => (
-                    <button
-                      key={category}
-                      type="button"
-                      onClick={() => goToCategory(category)}
-                      className="block w-full rounded-md px-3 py-2.5 text-left font-display text-sm text-muted transition-colors hover:bg-surface-2 hover:text-ink"
-                    >
-                      {categoryLabel(category)}
-                    </button>
-                  ))}
-
-                  <div className="my-1.5 border-t border-line" />
-
-                  <button
-                    type="button"
-                    onClick={() => goToCategory("all")}
-                    className="block w-full rounded-md px-3 py-2.5 text-left font-display text-sm text-ink transition-colors hover:bg-surface-2"
-                  >
-                    Everything
-                  </button>
-                </div>
-              )}
             </div>
 
-            <NavLink to="/saved" className={navLink}>
-              Saved
-            </NavLink>
+            <button
+              type="button"
+              onClick={() => browse({ category: "all", sort: "featured" })}
+              className="nav-link"
+            >
+              New Arrivals
+            </button>
+
+            <button
+              type="button"
+              onClick={() => browse({ category: "all", sort: "rating-desc" })}
+              className="nav-link"
+            >
+              Top Rated
+            </button>
           </div>
 
           {/* --- actions --- */}
@@ -166,7 +190,7 @@ export default function Navbar() {
             <button
               type="button"
               onClick={() => setSearchOpen(true)}
-              className="rounded-md p-2.5 text-muted transition-colors hover:text-ink"
+              className="rounded-sm p-2.5 text-muted transition-colors hover:text-ink"
               aria-label="Search products"
             >
               <SearchIcon width={19} height={19} />
@@ -175,7 +199,7 @@ export default function Navbar() {
             <button
               type="button"
               onClick={toggleTheme}
-              className="hidden rounded-md p-2.5 text-muted transition-colors hover:text-ink sm:block"
+              className="hidden rounded-sm p-2.5 text-muted transition-colors hover:text-ink sm:block"
               aria-label={
                 theme === "dark" ? "Switch to light theme" : "Switch to dark theme"
               }
@@ -187,44 +211,45 @@ export default function Navbar() {
               )}
             </button>
 
+            {user ? (
+              <div className="hidden items-center lg:flex">
+                <Link
+                  to="/checkout"
+                  className="flex items-center gap-2 px-3 text-[13px] text-muted transition-colors hover:text-ink"
+                >
+                  <UserIcon width={17} height={17} />
+                  {user.name}
+                </Link>
+                <button
+                  type="button"
+                  onClick={handleSignOut}
+                  className="btn btn-ghost text-[11px]"
+                >
+                  Sign out
+                </button>
+              </div>
+            ) : (
+              <Link
+                to="/login"
+                className="hidden rounded-sm p-2.5 text-muted transition-colors hover:text-ink lg:block"
+                aria-label="Sign in to your account"
+              >
+                <UserIcon width={19} height={19} />
+              </Link>
+            )}
+
             <Link
               to="/saved"
-              className="relative hidden rounded-md p-2.5 text-muted transition-colors hover:text-ink sm:block"
+              className="relative hidden rounded-sm p-2.5 text-muted transition-colors hover:text-ink sm:block"
               aria-label={`Saved items, ${savedCount} item${savedCount === 1 ? "" : "s"}`}
             >
               <HeartIcon width={19} height={19} />
               {savedCount > 0 && <Badge>{savedCount}</Badge>}
             </Link>
 
-            {/* Account state is explicit: a name when signed in, the word
-                "Sign in" when not — never just an anonymous avatar. */}
-            {user ? (
-              <div className="hidden items-center gap-1 lg:flex">
-                <span className="flex items-center gap-2 pl-3 pr-1 text-sm text-muted">
-                  <UserIcon width={17} height={17} />
-                  {user.name}
-                </span>
-                <button
-                  type="button"
-                  onClick={handleSignOut}
-                  className="btn btn-ghost text-sm"
-                >
-                  Sign out
-                </button>
-              </div>
-            ) : (
-              // Wrapped rather than given `hidden lg:inline-flex` directly:
-              // .btn sets display and would win over the utility.
-              <div className="hidden lg:block">
-                <Link to="/login" className="btn btn-ghost text-sm">
-                  Sign in
-                </Link>
-              </div>
-            )}
-
             <Link
               to="/cart"
-              className="relative rounded-md p-2.5 text-muted transition-colors hover:text-ink"
+              className="relative rounded-sm p-2.5 text-muted transition-colors hover:text-ink"
               aria-label={`Cart, ${cartCount} item${cartCount === 1 ? "" : "s"}`}
             >
               <CartIcon width={19} height={19} />
@@ -233,38 +258,54 @@ export default function Navbar() {
 
             <button
               type="button"
-              onClick={() => setMenuOpen(true)}
-              className="-mr-1 rounded-md p-2.5 text-muted transition-colors hover:text-ink lg:hidden"
+              onClick={() => setMobileOpen(true)}
+              className="-mr-1 rounded-sm p-2.5 text-muted transition-colors hover:text-ink lg:hidden"
               aria-label="Open menu"
             >
               <MenuIcon width={20} height={20} />
             </button>
           </div>
         </nav>
+
+        {megaOpen && menu.length > 0 && (
+          <div
+            onMouseEnter={() => clearTimeout(closeTimer.current)}
+            onMouseLeave={() => {
+              closeTimer.current = setTimeout(() => setMegaOpen(false), 160);
+            }}
+          >
+            <MegaMenu
+              menu={menu}
+              feature={feature}
+              onPick={browse}
+              onClose={closeMega}
+            />
+          </div>
+        )}
       </header>
 
       {/* Mounted only while open — see useOverlay. */}
       {searchOpen && <SearchOverlay onClose={closeSearch} />}
 
-      {menuOpen && (
+      {mobileOpen && (
         <MobileMenu
-          onClose={closeMenu}
-          categories={realCategories}
-          onCategory={goToCategory}
+          onClose={closeMobile}
+          menu={menu}
+          onBrowse={browse}
           user={user}
           onSignOut={handleSignOut}
           savedCount={savedCount}
+          cartCount={cartCount}
         />
       )}
     </>
   );
 }
 
-// Small enough to live here — it's only ever a nav count.
 function Badge({ children }) {
   return (
     <span
-      className="nums absolute right-0.5 top-0.5 min-w-[17px] rounded-full bg-accent px-1 text-center text-[10px] font-semibold leading-[17px] text-white"
+      className="nums absolute right-0.5 top-1 min-w-[16px] rounded-full bg-red-solid px-1 text-center font-display text-[10px] font-bold leading-4 text-white"
       aria-hidden="true"
     >
       {children}
