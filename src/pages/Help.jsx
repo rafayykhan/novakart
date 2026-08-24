@@ -54,14 +54,14 @@ export default function Help() {
           <p>
             The catalogue is the public{" "}
             <a
-              href="https://fakestoreapi.com"
+              href="https://dummyjson.com"
               target="_blank"
               rel="noreferrer noopener"
               className="text-ink underline decoration-line-strong underline-offset-4 hover:decoration-ink"
             >
-              Fake Store API
-            </a>
-            . Product titles, prices, photographs and ratings are its data,
+              DummyJSON
+            </a>{" "}
+            API. Product titles, prices, photographs and ratings are its data,
             shown as-is. Nothing on this site is a real product for sale.
           </p>
           <p>
