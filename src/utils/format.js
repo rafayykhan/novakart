@@ -1,3 +1,5 @@
+import { categoryLabelFor } from "../api/shopApi";
+
 export const money = (value) =>
   new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -7,10 +9,13 @@ export const money = (value) =>
 // "men's clothing" -> "Men's clothing"
 export const titleCase = (text) => text.charAt(0).toUpperCase() + text.slice(1);
 
-// Category strings arrive lowercased from the API. Nav and tiles want them
-// shouty and short, so they get their own formatter rather than titleCase.
-export const categoryLabel = (category) =>
-  category === "all" ? "Everything" : titleCase(category);
+/**
+ * Normalised products already carry `categoryLabel`, so prefer that. This is
+ * for the places that only have a raw slug in hand — the filter sidebar, the
+ * shop page heading — where there's no product object to read it from.
+ */
+export const categoryLabel = (slug) =>
+  slug === "all" ? "Everything" : categoryLabelFor(slug);
 
 // "men's clothing" -> "mens-clothing", for URLs.
 export const slugify = (text) =>
