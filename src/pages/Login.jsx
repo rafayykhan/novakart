@@ -12,6 +12,7 @@ import {
 import { selectAllProducts } from "../features/products/productsSlice";
 import { DEMO_CREDENTIALS } from "../api/shopApi";
 import { AlertIcon } from "../components/Icons";
+import Logo from "../components/layout/Logo";
 
 /**
  * Split layout: a brand panel on the left, the form on the right.
@@ -65,14 +66,14 @@ export default function Login() {
   return (
     <div className="grid min-h-[calc(100dvh-8rem)] lg:grid-cols-2">
       {/* --- brand panel --- */}
-      <aside className="relative hidden flex-col justify-between border-r border-line bg-surface p-12 lg:flex xl:p-16">
-        <p className="eyebrow">NovaKart · Account</p>
+      <aside className="on-ink relative hidden flex-col justify-between p-12 lg:flex xl:p-16">
+        <Logo onDark size="md" className="self-start" />
 
         <div className="max-w-md">
-          <p className="t-quote text-ink text-balance">
+          <p className="t-quote text-[#f4efe6] text-balance">
             Less noise. Better products.
           </p>
-          <p className="t-lead mt-6">
+          <p className="mt-6 text-[15px] leading-relaxed text-[#f4efe6]/70">
             Your cart works signed out. An account is only needed at the point
             of placing an order.
           </p>
@@ -88,7 +89,7 @@ export default function Login() {
             />
           </div>
         ) : (
-          <div className="h-56 w-56 rounded-lg bg-surface-2" aria-hidden="true" />
+          <div className="h-56 w-56 rounded-lg bg-[#f4efe6]/10" aria-hidden="true" />
         )}
       </aside>
 
