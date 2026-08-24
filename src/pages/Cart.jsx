@@ -19,7 +19,7 @@ export default function Cart() {
     return (
       <EmptyState
         eyebrow="Cart"
-        title="Your cart is waiting."
+        title="Your bag is empty."
         description="Nothing in it yet. The catalogue is short — it won't take long to find something."
         actionLabel="Continue shopping"
         actionTo="/products"
@@ -32,9 +32,10 @@ export default function Cart() {
       <div className="flex items-end justify-between gap-4 border-b border-line pb-6">
         <div>
           <p className="eyebrow">Cart</p>
-          <h1 className="t-section mt-3 text-ink">
+          <h1 className="t-section mt-3 text-ink">Your bag</h1>
+          <p className="nums mt-3 text-sm text-muted">
             {count} {count === 1 ? "item" : "items"}
-          </h1>
+          </p>
         </div>
 
         <button
@@ -52,11 +53,17 @@ export default function Cart() {
       <div className="mt-10 grid gap-10 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-16">
         {/* min-w-0 stops long product titles setting the grid column's
             intrinsic width and overflowing the page on narrow screens. */}
-        <ul className="min-w-0">
-          {items.map((item) => (
-            <CartItem key={item.id} item={item} />
-          ))}
-        </ul>
+        <div className="min-w-0">
+          {/* Item titles are h3s; without this the page jumps h1 -> h3 at the
+              first line. The summary opposite already has its own h2. */}
+          <h2 className="sr-only">Items in your bag</h2>
+
+          <ul>
+            {items.map((item) => (
+              <CartItem key={item.id} item={item} />
+            ))}
+          </ul>
+        </div>
 
         <div className="min-w-0 lg:sticky lg:top-28 lg:self-start">
           <CartSummary>
