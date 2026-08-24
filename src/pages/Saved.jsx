@@ -43,9 +43,7 @@ export default function Saved() {
       <div className="flex items-end justify-between gap-4 border-b border-line pb-6">
         <div>
           <p className="eyebrow">Saved</p>
-          <h1 className="t-section mt-3 text-ink">
-            {loading ? "Saved items" : `${saved.length} ${saved.length === 1 ? "item" : "items"}`}
-          </h1>
+          <h1 className="t-section mt-3 text-ink">Saved</h1>
         </div>
 
         {saved.length > 0 && (
@@ -59,11 +57,15 @@ export default function Saved() {
         )}
       </div>
 
-      <p className="mt-5 text-sm text-muted">
+      <p className="t-lead measure mt-5">Things you're keeping an eye on.</p>
+      <p className="mt-2 text-sm text-muted">
         Kept in this browser only — there's no account sync behind it.
       </p>
 
       <div className="mt-10">
+        {/* Card titles are h3s; without this the page jumps h1 -> h3. */}
+        <h2 className="sr-only">Saved products</h2>
+
         {loading && <ProductGridSkeleton count={Math.min(ids.length || 4, 8)} />}
 
         {failed && (
