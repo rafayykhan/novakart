@@ -1,34 +1,34 @@
 import { Link } from "react-router-dom";
 import { ArrowRightIcon } from "../Icons";
-import { FREE_SHIPPING_OVER, SHIPPING_FLAT } from "../../features/cart/shipping";
+import { FREE_SHIPPING_OVER } from "../../features/cart/shipping";
 import { money } from "../../utils/format";
 
 /**
- * Slim utility strip. It scrolls away — only the nav below it sticks.
+ * Slim ink strip above the nav. It scrolls away — only the nav below sticks.
  *
- * The one claim it makes is the shipping threshold, and that's read from the
- * same constants the cart totals use, so the bar can't drift out of sync with
- * what a shopper is actually charged. No countdowns, no invented discounts.
+ * The shipping threshold is read from the same constant the cart totals use,
+ * so the promise up here can't drift from what a shopper is actually charged.
+ * No countdowns, no invented percentages.
  */
 export default function AnnouncementBar() {
   return (
-    <div className="border-b border-line bg-surface-2">
-      <div className="shell flex h-9 items-center justify-center gap-x-6 sm:h-8">
-        <p className="truncate text-center text-[11px] tracking-[0.08em] text-muted sm:text-xs">
-          Free shipping over{" "}
-          <span className="nums text-ink">{money(FREE_SHIPPING_OVER)}</span>
-          <span className="hidden sm:inline">
-            {" "}
-            · {money(SHIPPING_FLAT)} flat rate below that
-          </span>
+    <div className="on-ink">
+      <div className="shell flex h-10 items-center justify-between gap-4">
+        <p className="font-display truncate text-[10px] font-semibold uppercase tracking-[0.18em] text-[#f4efe6] sm:text-[11px] sm:tracking-[0.22em]">
+          Free shipping on orders{" "}
+          <span className="nums">{money(FREE_SHIPPING_OVER)}</span>+
         </p>
 
         <Link
           to="/products"
-          className="hidden shrink-0 items-center gap-1.5 text-xs text-muted transition-colors hover:text-ink md:inline-flex"
+          className="group hidden shrink-0 items-center gap-2 font-display text-[11px] font-semibold uppercase tracking-[0.22em] text-[#f4efe6]/75 transition-colors hover:text-[#f4efe6] sm:inline-flex"
         >
-          Browse the shop
-          <ArrowRightIcon width={13} height={13} />
+          Shop NovaKart
+          <ArrowRightIcon
+            width={13}
+            height={13}
+            className="transition-transform duration-200 group-hover:translate-x-1"
+          />
         </Link>
       </div>
     </div>
