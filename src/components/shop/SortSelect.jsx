@@ -32,7 +32,7 @@ export default function SortSelect({ className = "" }) {
         id={id}
         value={sort}
         onChange={(e) => dispatch(sortChanged(e.target.value))}
-        className="w-full cursor-pointer appearance-none rounded-md border border-line bg-surface py-2.5 pl-3.5 pr-10 font-display text-sm text-ink outline-none transition-colors hover:border-ink focus-visible:border-accent"
+        className="w-full cursor-pointer appearance-none rounded-sm border border-line-strong bg-surface py-3 pl-3.5 pr-10 font-display text-[13px] font-semibold uppercase tracking-[0.04em] text-ink outline-none transition-colors hover:border-ink focus-visible:border-red"
       >
         {SORT_OPTIONS.map((option) => (
           <option key={option.value} value={option.value}>
