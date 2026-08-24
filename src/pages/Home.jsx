@@ -1,53 +1,76 @@
 import { useMemo } from "react";
-import { useSelector } from "react-redux";
-import { selectAllProducts } from "../features/products/productsSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import {
+  queryChanged,
+  categoryChanged,
+  sortChanged,
+  selectAllProducts,
+} from "../features/products/productsSlice";
 import { useCatalogue } from "../hooks/useCatalogue";
 import Hero from "../components/home/Hero";
 import ValueProps from "../components/home/ValueProps";
-import CategoryGrid from "../components/home/CategoryGrid";
-import ProductBand from "../components/home/ProductBand";
-import EditorialSection from "../components/home/EditorialSection";
-import PromoSection from "../components/home/PromoSection";
+import DepartmentShowcase from "../components/home/DepartmentShowcase";
+import ProductCarousel from "../components/product/ProductCarousel";
+import BrandStory from "../components/home/BrandStory";
+import CampaignSection from "../components/home/CampaignSection";
 import Newsletter from "../components/home/Newsletter";
 
 /**
  * The homepage's job is pacing.
  *
- * Hero → four short promises → categories → products → a paragraph with a
- * point of view → one promo → products again → signup. Two product grids
- * total, and never back to back: everything between them is there so the
- * page has somewhere to breathe.
+ * Full-viewport hero → four short promises → departments → products →
+ * a paragraph with a point of view → full-bleed campaign → products again →
+ * signup. Two product rails total, never back to back: everything between
+ * them is there so the page has somewhere to breathe.
  */
 export default function Home() {
   const { loading, failed, retry } = useCatalogue();
   const products = useSelector(selectAllProducts);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-  // "Featured" is one per category then whatever's next, so the first grid
-  // shows the range of the shop rather than eight variations of one thing.
-  const featured = useMemo(() => {
+  function browse(sort) {
+    dispatch(queryChanged(""));
+    dispatch(categoryChanged("all"));
+    dispatch(sortChanged(sort));
+    navigate("/products");
+  }
+
+  /**
+   * "The selection" — one product per department, then whatever's next, so
+   * the first rail shows the range of the shop rather than eight variations
+   * of one thing. In stock only; a rail that opens with a sold-out item is a
+   * bad first impression.
+   */
+  const selection = useMemo(() => {
     const seen = new Set();
     const leading = [];
     const rest = [];
 
-    for (const product of products) {
-      if (!seen.has(product.category)) {
-        seen.add(product.category);
-        leading.push(product);
+    for (const p of products) {
+      if (!p.inStock) continue;
+      if (!seen.has(p.category)) {
+        seen.add(p.category);
+        leading.push(p);
       } else {
-        rest.push(product);
+        rest.push(p);
       }
     }
 
-    return [...leading, ...rest].slice(0, 8);
+    return [...leading, ...rest].slice(0, 10);
   }, [products]);
 
-  // A real, checkable claim: these genuinely are the sub-$50 items.
-  const affordable = useMemo(
+  /**
+   * Genuinely the highest-rated things in the catalogue — a claim the `rating`
+   * field can actually support, unlike "best sellers".
+   */
+  const topRated = useMemo(
     () =>
       [...products]
-        .filter((p) => p.price < 50)
-        .sort((a, b) => a.price - b.price)
-        .slice(0, 4),
+        .filter((p) => p.inStock && p.rating != null)
+        .sort((a, b) => b.rating - a.rating)
+        .slice(0, 10),
     [products]
   );
 
@@ -57,42 +80,38 @@ export default function Home() {
 
       <ValueProps />
 
-      <CategoryGrid />
+      <DepartmentShowcase />
 
-      <ProductBand
-        id="featured"
+      <ProductCarousel
+        id="selection"
         eyebrow="The selection"
         title="Worth making room for"
-        description="A spread across every category — start here if you're not sure where to look."
+        description="A spread across every department — start here if you're not sure where to look."
         action="View everything"
-        actionTo="/products"
-        products={featured}
+        onAction={() => browse("featured")}
+        products={selection}
         loading={loading}
         failed={failed}
         onRetry={retry}
-        columns={4}
         className="border-t border-line"
       />
 
-      <EditorialSection />
+      <BrandStory />
 
-      <PromoSection />
+      <CampaignSection />
 
-      {affordable.length === 4 && (
-        <ProductBand
-          id="under-fifty"
-          eyebrow="Small spend"
-          title="Everything under $50"
-          description="The least expensive things we carry, and none of them feel like it."
-          action="Sort by price"
-          actionTo="/products"
-          products={affordable}
-          loading={false}
-          failed={false}
-          columns={4}
-          className="border-t border-line"
-        />
-      )}
+      <ProductCarousel
+        id="top-rated"
+        eyebrow="Most loved"
+        title="Top rated"
+        description="The best-scoring products we carry, ranked by their own ratings."
+        action="Shop top rated"
+        onAction={() => browse("rating-desc")}
+        products={topRated}
+        loading={loading}
+        failed={failed}
+        onRetry={retry}
+      />
 
       <Newsletter />
     </>
