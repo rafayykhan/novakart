@@ -20,7 +20,7 @@ export default function FilterDrawer({ onClose, resultCount }) {
   return (
     <div className="fixed inset-0 z-50 lg:hidden">
       <div
-        className="fade-in absolute inset-0 bg-black/45"
+        className="fade-in absolute inset-0 bg-[#201e1d]/45"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -31,17 +31,20 @@ export default function FilterDrawer({ onClose, resultCount }) {
         aria-modal="true"
         aria-labelledby="filter-drawer-title"
         tabIndex={-1}
-        className="slide-up absolute inset-x-0 bottom-0 flex max-h-[85dvh] flex-col rounded-t-xl border-t border-line bg-bg outline-none"
+        className="slide-up absolute inset-x-0 bottom-0 flex max-h-[85dvh] flex-col rounded-t-lg border-t border-line bg-bg outline-none"
       >
         <div className="flex shrink-0 items-center justify-between border-b border-line px-5 py-4">
-          <h2 id="filter-drawer-title" className="font-display text-base font-semibold text-ink">
+          <h2
+            id="filter-drawer-title"
+            className="font-display text-sm font-bold uppercase tracking-[0.04em] text-ink"
+          >
             Filter &amp; sort
           </h2>
 
           <button
             type="button"
             onClick={onClose}
-            className="-mr-2 rounded-md p-2 text-muted transition-colors hover:text-ink"
+            className="-mr-2 rounded-sm p-2 text-muted transition-colors hover:text-ink"
             aria-label="Close filters"
           >
             <CloseIcon width={20} height={20} />
@@ -49,8 +52,8 @@ export default function FilterDrawer({ onClose, resultCount }) {
         </div>
 
         <div className="flex-1 overflow-y-auto px-5 py-6">
-          <div className="mb-10">
-            <p className="eyebrow mb-4">Sort</p>
+          <div className="mb-9">
+            <p className="eyebrow mb-4">Sort by</p>
             <SortSelect />
           </div>
 
