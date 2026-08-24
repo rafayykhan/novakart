@@ -1,28 +1,37 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>NovaKart — Chosen well.</title>
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>NovaKart — Better things. Chosen well.</title>
+    <link rel="icon" type="image/svg+xml" href="/brand/novakart-favicon.svg" />
+    <link rel="apple-touch-icon" href="/brand/novakart-favicon-512.png" />
     <meta
       name="description"
-      content="NovaKart is a small, curated shop. Fewer products, presented properly."
+      content="NovaKart — a curated edit of everyday essentials. Better things, chosen well."
     />
-    <meta name="theme-color" content="#0d0d0f" media="(prefers-color-scheme: dark)" />
-    <meta name="theme-color" content="#f7f6f2" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#f4efe6" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#1a1918" media="(prefers-color-scheme: dark)" />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Archivo 800 is the wordmark weight specified by the brand assets, so it
+         has to be here for the lockup to match the supplied logo exactly. -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@1,400;1,500&family=Inter:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
 
+    <!-- Product imagery is served from the DummyJSON CDN; warming the
+         connection here saves a handshake on the first hero image.
+         Unsplash serves the two editorial photographs. -->
+    <link rel="preconnect" href="https://cdn.dummyjson.com" crossorigin />
+    <link rel="preconnect" href="https://images.unsplash.com" crossorigin />
+
     <script>
-      // Paint the stored theme before first render. Without this the page
-      // flashes dark for a frame when a returning visitor prefers light.
-      // ThemeContext still owns the value — this only front-runs it.
+      // Paint the stored theme before first render, otherwise a returning
+      // visitor who chose dark gets a frame of cream. ThemeContext still owns
+      // the value — this only front-runs it.
       try {
         var saved = JSON.parse(localStorage.getItem("novakart_theme"));
         if (saved === "light" || saved === "dark") {
