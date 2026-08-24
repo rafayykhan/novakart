@@ -19,12 +19,12 @@ export default function QuantitySelector({
   const width = size === "sm" ? "w-7" : "w-9";
 
   return (
-    <div className="inline-flex items-center rounded-md border border-line">
+    <div className="inline-flex items-center rounded-sm border border-line">
       <button
         type="button"
         onClick={onDecrease}
         disabled={value <= min}
-        className={`${pad} rounded-l-md text-muted transition-colors hover:text-ink disabled:opacity-35 disabled:hover:text-muted`}
+        className={`${pad} rounded-l-sm text-muted transition-colors hover:text-red disabled:opacity-35 disabled:hover:text-muted`}
         aria-label={`Decrease quantity of ${label}`}
       >
         <MinusIcon width={14} height={14} />
@@ -41,7 +41,7 @@ export default function QuantitySelector({
       <button
         type="button"
         onClick={onIncrease}
-        className={`${pad} rounded-r-md text-muted transition-colors hover:text-ink`}
+        className={`${pad} rounded-r-sm text-muted transition-colors hover:text-red`}
         aria-label={`Increase quantity of ${label}`}
       >
         <PlusIcon width={14} height={14} />
