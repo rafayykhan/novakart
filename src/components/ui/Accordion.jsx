@@ -2,7 +2,9 @@ import { useState } from "react";
 import { PlusIcon, MinusIcon } from "../Icons";
 
 /**
- * Disclosure list.
+ * Disclosure list, styled to the editorial system: uppercase Archivo
+ * triggers with a red +/- as the one spot of colour in the row, hairline
+ * dividers instead of panel borders.
  *
  * Real <button>s with aria-expanded/aria-controls rather than <details>,
  * because the panels need to be styled and animated consistently across
@@ -28,14 +30,14 @@ export default function Accordion({ items, defaultOpen = 0 }) {
                 aria-expanded={isOpen}
                 aria-controls={panelId}
                 onClick={() => setOpen(isOpen ? -1 : i)}
-                className="flex w-full items-center justify-between gap-4 py-5 text-left font-display text-sm font-medium text-ink transition-colors hover:text-muted"
+                className="flex w-full items-center justify-between gap-4 py-5 text-left font-display text-xs font-semibold uppercase tracking-[0.14em] text-ink transition-colors hover:text-red"
               >
                 {item.title}
-                <span className="shrink-0 text-muted">
+                <span className="shrink-0 text-red" aria-hidden="true">
                   {isOpen ? (
-                    <MinusIcon width={16} height={16} />
+                    <MinusIcon width={14} height={14} />
                   ) : (
-                    <PlusIcon width={16} height={16} />
+                    <PlusIcon width={14} height={14} />
                   )}
                 </span>
               </button>
